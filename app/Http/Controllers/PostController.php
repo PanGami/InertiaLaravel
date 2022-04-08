@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PostCreateRequest;
+use App\Http\Requests\PostUpdateRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
 
 class PostController extends Controller
 {
@@ -14,7 +18,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        $posts = Post::latest()->paginate(10);
+        return Inertia::render('Post/Index', ['posts' => $posts]);
     }
 
     /**
@@ -24,7 +29,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Post/Create');
     }
 
     /**
@@ -33,10 +38,12 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PostCreateRequest $request)
     {
-        //
+        Post::create($request->validated());
+        return redirect()->route('posts.index');
     }
+
 
     /**
      * Display the specified resource.
@@ -46,7 +53,13 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return Inertia::render('Post/Edit', [
+            'post' => [
+                'id' => $post->id,
+                'title' => $post->title,
+                'description' => $post->description
+            ]
+        ]);
     }
 
     /**
@@ -57,7 +70,13 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        return Inertia::render('Post/Edit', [
+            'post' => [
+                'id' => $post->id,
+                'title' => $post->title,
+                'description' => $post->description
+            ]
+        ]);
     }
 
     /**
@@ -67,9 +86,10 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Post $post)
+    public function update(PostUpdateRequest $request, Post $post)
     {
-        //
+        $post->update($request->validated());
+        return redirect()->route('posts.index');
     }
 
     /**
@@ -80,6 +100,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        $post->delete();
+        return redirect()->route('posts.index');
     }
 }
